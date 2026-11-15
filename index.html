@@ -1,0 +1,1397 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聖誕星星捕捉挑戰</title>
+
+<style>
+*{box-sizing:border-box;user-select:none}
+
+body{
+    margin:0;padding:22px;min-height:100vh;
+    position:relative;overflow-x:hidden;
+    background:linear-gradient(145deg,#dceefa,#c8e5f8);
+    font-family:Arial,"Microsoft JhengHei",sans-serif;
+    color:#43566b;
+    display:flex;justify-content:center;align-items:flex-start
+}
+
+body::before,body::after{
+    content:"";position:fixed;inset:-100px 0 0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(3px 3px at 40px 60px,#fff 98%,transparent),
+      radial-gradient(4px 4px at 120px 150px,#fff 98%,transparent),
+      radial-gradient(2px 2px at 220px 90px,#fff 98%,transparent),
+      radial-gradient(3px 3px at 310px 210px,#fff 98%,transparent),
+      radial-gradient(4px 4px at 420px 40px,#fff 98%,transparent);
+    background-size:500px 300px;
+    opacity:.7;
+    animation:backgroundSnow 12s linear infinite;
+    z-index:0
+}
+
+body::after{
+    inset:-150px 0 0;
+    background-image:
+      radial-gradient(2px 2px at 80px 100px,#fff 98%,transparent),
+      radial-gradient(3px 3px at 180px 230px,#fff 98%,transparent),
+      radial-gradient(2px 2px at 350px 70px,#fff 98%,transparent),
+      radial-gradient(4px 4px at 460px 180px,#fff 98%,transparent);
+    background-size:550px 350px;
+    opacity:.55;
+    animation-duration:18s
+}
+
+@keyframes backgroundSnow{
+    from{background-position:0 -100px}
+    to{background-position:100px 500px}
+}
+
+.container{
+    width:100%;max-width:1000px;min-height:760px;
+    margin:5px auto;background:#fff;
+    border-radius:28px;
+    box-shadow:0 12px 35px rgba(60,100,130,.18);
+    overflow:hidden;position:relative;z-index:1;
+    display:flex;flex-direction:column
+}
+
+.top-title{
+    background:linear-gradient(120deg,#eaf6ff,#f8fcff);
+    padding:19px 20px 13px;text-align:center;
+    border-bottom:2px solid #e4eff7
+}
+
+.top-title h1{
+    margin:0;color:#2877a9;
+    font-size:30px;letter-spacing:2px
+}
+
+.top-title p{
+    margin:5px 0 0;color:#7992a7;font-size:14px
+}
+
+.lights{
+    display:flex;justify-content:space-around;
+    padding:6px 20px;background:#fffaf0;
+    border-bottom:1px solid #f5e8d3;font-size:18px
+}
+
+.header{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;padding:13px 20px;
+    background:#edf7ff;border-bottom:2px solid #d7eaf8;
+    font-size:15px;font-weight:bold
+}
+
+.info-box{
+    min-height:46px;display:flex;
+    align-items:center;justify-content:center;
+    gap:5px;padding:9px;
+    border:1px solid #d9ebf8;
+    border-radius:12px;background:#fff;text-align:center
+}
+
+.header span{color:#2877b8}
+
+.canvas{
+    position:relative;flex:1;min-height:470px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 20% 20%,rgba(255,255,255,.6) 0 2px,transparent 3px),
+      linear-gradient(to bottom,#dff2ff 0%,#eaf7ff 65%,#f8fcff 100%);
+    cursor:crosshair
+}
+
+.snowflake{
+    position:absolute;top:-35px;color:white;
+    opacity:.9;pointer-events:none;z-index:1;
+    animation:snowfall linear infinite
+}
+
+@keyframes snowfall{
+    from{transform:translateY(-30px) rotate(0deg)}
+    to{transform:translateY(550px) rotate(360deg)}
+}
+
+.snow-ground{
+    position:absolute;bottom:0;left:0;
+    width:100%;height:75px;
+    background:linear-gradient(to bottom,#f5fbff,#fff);
+    border-radius:50% 50% 0 0 / 25% 25% 0 0;
+    pointer-events:none;z-index:1
+}
+
+.tree{
+    position:absolute;bottom:35px;left:15px;
+    font-size:62px;z-index:3;pointer-events:none
+}
+
+.tree-right{
+    position:absolute;bottom:37px;right:15px;
+    font-size:55px;z-index:3;pointer-events:none
+}
+
+/* 遊戲中的星星和炸彈：縮小 */
+.item{
+    position:absolute;
+    width:70px;height:70px;
+    border-radius:50%;
+    display:flex;justify-content:center;align-items:center;
+    font-size:42px;cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,.16);
+    z-index:10;animation:popIn .2s ease-out;
+    transition:transform .1s,opacity .1s;
+    border:3px solid white;
+    touch-action:manipulation
+}
+
+.star{background:#fff2b5;border-color:#f2c94c}
+.bomb{background:#f9d0d0;border-color:#e47b75}
+
+@keyframes popIn{
+    from{transform:scale(0);opacity:0}
+    to{transform:scale(1);opacity:1}
+}
+
+.countdown{
+    position:absolute;inset:0;z-index:50;
+    display:flex;justify-content:center;align-items:center;
+    font-size:100px;font-weight:bold;color:#2877b8;
+    text-shadow:0 4px 12px rgba(255,255,255,.9);
+    background:rgba(255,255,255,.35);
+    pointer-events:none
+}
+
+.hidden{display:none!important}
+
+.overlay{
+    position:absolute;inset:0;z-index:100;
+    background:rgba(255,255,255,.98);
+    display:flex;flex-direction:column;
+    justify-content:center;align-items:center;
+    text-align:center;padding:25px 22px;
+    overflow-y:auto
+}
+
+.overlay h2{
+    font-size:30px;color:#2877b8;margin:0 0 12px
+}
+
+.overlay p{
+    color:#687f91;font-size:17px;line-height:1.7
+}
+
+.name-input{
+    width:min(420px,90%);min-height:54px;
+    padding:12px 16px;border:2px solid #cbd8df;
+    border-radius:10px;font-size:19px;
+    text-align:center;outline:none;
+    margin:10px;user-select:text
+}
+
+.name-input:focus{border-color:#438fc4}
+
+.btn{
+    border:none;padding:12px 23px;
+    font-size:18px;font-weight:bold;
+    border-radius:10px;cursor:pointer;
+    color:white;transition:.15s;
+    box-shadow:0 4px 10px rgba(0,0,0,.12)
+}
+
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.97)}
+
+.btn.easy,.btn.medium,.btn.hard{background:#438fc4}
+.btn.blue{background:#2877b8}
+.btn.gray{background:#8295a6}
+
+.difficulty-group{
+    display:flex;flex-wrap:wrap;
+    justify-content:center;gap:13px;margin:10px auto
+}
+
+/* ===== 首頁介面 ===== */
+
+#startScreen{
+    justify-content:flex-start;
+    align-items:center;
+    gap:0;
+    padding:25px 35px 24px;
+    overflow-y:auto;
+    background:rgba(255,255,255,.97)
+}
+
+/* 聖誕老公公：首頁背景裝飾 */
+#startScreen::before{
+    content:"🎅";
+    position:absolute;
+    right:35px;
+    bottom:25px;
+    font-size:175px;
+    opacity:.15;
+    pointer-events:none;
+    z-index:0;
+    transform:rotate(-8deg)
+}
+
+/* 首頁內容保持在背景前面 */
+#startScreen>*{
+    position:relative;
+    z-index:1
+}
+
+#startScreen h2{
+    margin:0 0 15px;
+    font-size:30px;color:#2877b8
+}
+
+#startScreen .home-name-label{
+    display:block;margin:5px 0 8px;
+    color:#43566b;font-size:20px;font-weight:700
+}
+
+#startScreen .name-input{
+    width:min(430px,95%);
+    min-height:54px;margin:0 auto 15px;
+    font-size:19px;border-radius:8px
+}
+
+#startScreen .home-difficulty-label{
+    margin:5px 0 10px;
+    color:#43566b;font-size:20px;font-weight:700
+}
+
+/* 難度框框縮小，文字大小維持不變 */
+#startScreen #difficultyGroup{
+    display:flex;flex-direction:row;
+    flex-wrap:nowrap;justify-content:center;
+    gap:12px;width:min(650px,100%);
+    margin:0 auto 14px
+}
+
+#startScreen #difficultyGroup .btn{
+    flex:0 1 190px;
+    width:190px;
+    max-width:190px;
+    min-width:0;
+    min-height:62px;
+    padding:8px 10px;
+    border:3px solid transparent;
+    border-radius:10px;
+    background:#438fc4;
+    color:#fff;
+    font-size:24px;
+    font-weight:700;
+    line-height:1.3
+}
+
+#startScreen #difficultyGroup .btn.selected-level{
+    background:#2877b8;
+    border:3px solid #f2c94c;
+    outline:none;
+    transform:translateY(-2px)
+}
+
+#startScreen .start-game-button{
+    min-width:190px;
+    min-height:50px;
+    margin:2px auto 15px;
+    padding:10px 25px;
+    border-radius:10px;
+    background:#e6a12b;
+    color:#fff;font-size:22px
+}
+
+/* ===== 紀錄表格 ===== */
+
+.section-title{
+    width:100%;color:#43566b;
+    font-weight:bold;margin:10px auto 8px;
+    font-size:21px;text-align:center
+}
+
+.record-list{
+    width:100%;max-width:900px;
+    max-height:190px;overflow:auto;
+    margin:0 auto 5px;padding:0;
+    border:1px solid #cfe3f2;
+    background:#fff;text-align:left
+}
+
+.records-table{
+    width:100%;min-width:650px;
+    border-collapse:collapse;
+    text-align:center;font-size:15px
+}
+
+.records-table th{
+    position:sticky;top:0;z-index:2;
+    padding:10px;background:#438fc4;
+    color:#fff;font-weight:700;white-space:nowrap
+}
+
+.records-table td{
+    padding:9px;border-bottom:1px solid #e1edf5;
+    color:#43566b;white-space:nowrap
+}
+
+.records-table tbody tr:nth-child(even){
+    background:#f0f8ff
+}
+
+.records-empty{
+    padding:17px;text-align:center;color:#71889a
+}
+
+#startScreen .home-record-actions{
+    width:100%;display:flex;
+    justify-content:flex-start;
+    align-items:center;gap:10px;
+    margin:8px 0 0
+}
+
+#startScreen .home-record-actions .btn{
+    min-height:43px;padding:8px 17px;
+    font-size:16px;border-radius:8px
+}
+
+/* ===== 結果畫面 ===== */
+
+.result-card{
+    width:100%;max-width:720px;
+    max-height:42vh;overflow-y:auto;
+    background:#f0f8ff;border-radius:14px;
+    padding:14px;margin:8px 0
+}
+
+.result-row{
+    display:flex;justify-content:space-between;
+    gap:10px;padding:9px;
+    border-bottom:1px solid #d5e7f4;
+    font-size:15px
+}
+
+.result-row strong{color:#2877b8}
+
+.result-table{
+    width:100%;border-collapse:collapse;
+    font-size:13px;margin-top:10px
+}
+
+.result-table th,.result-table td{
+    border:1px solid #d5e7f4;
+    padding:7px 4px;text-align:center
+}
+
+.result-table th{
+    background:#dceefa;color:#356b91
+}
+
+.small-note{
+    font-size:13px!important;color:#8295a6!important
+}
+
+#gameOverScreen #resultsRecords{
+    width:min(100%,900px);
+    height:300px;max-height:35vh;
+    min-height:180px;overflow-y:auto;
+    overflow-x:auto;-webkit-overflow-scrolling:touch
+}
+
+#gameOverScreen .difficulty-group{margin-top:8px}
+
+.footer{
+    padding:10px;text-align:center;
+    background:#fff8ed;color:#9a927e;
+    font-size:13px;border-top:1px solid #f3e9da
+}
+
+@media(max-width:850px){
+    body{padding:14px}
+    .container{min-height:760px}
+    .header{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .canvas{min-height:450px}
+}
+
+@media(max-width:600px){
+    body{padding:8px}
+    .container{min-height:760px;border-radius:22px}
+
+    .top-title{padding:15px 10px 11px}
+    .top-title h1{font-size:23px}
+    .top-title p{font-size:12px}
+
+    .lights{padding:6px 10px;font-size:15px}
+
+    .header{gap:7px;padding:10px 8px;font-size:13px}
+    .info-box{min-height:42px;padding:7px 4px;font-size:13px}
+
+    .canvas{min-height:430px}
+
+    .item{
+        width:62px;height:62px;font-size:37px
+    }
+
+    .tree{font-size:48px;left:3px;bottom:30px}
+    .tree-right{font-size:43px;right:3px;bottom:32px}
+
+    #startScreen{padding:20px 12px}
+    #startScreen::before{
+        right:5px;bottom:15px;font-size:115px
+    }
+
+    #startScreen h2{
+        font-size:24px;margin-bottom:13px
+    }
+
+    #startScreen .home-name-label{font-size:17px}
+
+    #startScreen .name-input{
+        min-height:48px;font-size:16px
+    }
+
+    #startScreen .home-difficulty-label{font-size:18px}
+
+    #startScreen #difficultyGroup{
+        gap:6px;width:100%
+    }
+
+    #startScreen #difficultyGroup .btn{
+        flex:1 1 0;
+        width:auto;
+        max-width:150px;
+        min-height:55px;
+        padding:7px 3px;
+        font-size:18px
+    }
+
+    #startScreen .start-game-button{
+        min-width:170px;
+        min-height:45px;
+        font-size:19px
+    }
+
+    .section-title{font-size:18px}
+
+    .records-table th,.records-table td{
+        font-size:13px;padding:8px 6px
+    }
+
+    #startScreen .home-record-actions{
+        justify-content:flex-start;gap:7px
+    }
+
+    #startScreen .home-record-actions .btn{
+        min-height:40px;padding:7px 10px;
+        font-size:13px
+    }
+
+    .overlay{padding:16px 10px}
+    .overlay h2{font-size:24px}
+    .overlay p{font-size:15px}
+
+    .result-card{max-height:38vh;padding:10px}
+
+    #gameOverScreen #resultsRecords{
+        height:250px;max-height:32vh;min-height:160px
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="top-title">
+        <h1>🎄 聖誕星星捕捉挑戰 ⭐</h1>
+        <p>Christmas Star Catching Challenge</p>
+    </div>
+
+    <div class="lights">
+        <span>🔴</span><span>🟡</span><span>🟢</span>
+        <span>🔴</span><span>🟡</span><span>🟢</span>
+        <span>🔴</span><span>🟡</span><span>🟢</span>
+    </div>
+
+    <div class="header">
+        <div class="info-box">受測者：<span id="playerName">尚未輸入</span></div>
+        <div class="info-box">分數：<span id="score">0</span></div>
+        <div class="info-box">時間：<span id="timer">30</span>s</div>
+        <div class="info-box">模式：<span id="levelText">尚未開始</span></div>
+    </div>
+
+    <div class="canvas" id="canvas">
+        <div class="snow-ground"></div>
+        <div class="tree">🎄</div>
+        <div class="tree-right">🎄</div>
+        <div id="countdown" class="countdown hidden"></div>
+    </div>
+
+    <div class="footer">❄️ Merry Christmas · 聖誕快樂 ❄️</div>
+
+    <!-- 首頁 -->
+    <div id="startScreen" class="overlay">
+
+        <h2>🎄 聖誕星星捕捉挑戰 ⭐</h2>
+
+        <label class="home-name-label" for="nameInput">
+            請輸入受測者姓名或暱稱
+        </label>
+
+        <input id="nameInput" class="name-input"
+            type="text" maxlength="20"
+            placeholder="請輸入受測者姓名或暱稱">
+
+        <p class="home-difficulty-label">請選擇遊戲難度</p>
+
+        <div class="difficulty-group" id="difficultyGroup">
+
+            <button type="button" class="btn easy"
+                data-level="easy"
+                onclick="selectDifficulty('easy')">
+                第一關<br>初階
+            </button>
+
+            <button type="button" class="btn medium selected-level"
+                data-level="medium"
+                onclick="selectDifficulty('medium')">
+                第二關<br>中階
+            </button>
+
+            <button type="button" class="btn hard"
+                data-level="hard"
+                onclick="selectDifficulty('hard')">
+                第三關<br>高階
+            </button>
+
+        </div>
+
+        <button type="button"
+            class="btn blue start-game-button"
+            onclick="startGame()">
+            開始遊戲
+        </button>
+
+        <div class="section-title">所有受測者完成紀錄</div>
+
+        <div id="homeRecords" class="record-list">
+            尚無測驗紀錄
+        </div>
+
+        <div class="home-record-actions">
+            <button class="btn blue" onclick="exportCSV()">
+                下載所有受測者 CSV 紀錄
+            </button>
+
+            <button class="btn gray" onclick="clearRecords()">
+                清除所有紀錄
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 結果畫面 -->
+    <div id="gameOverScreen" class="overlay hidden">
+
+        <h2>🎉 測驗完成！</h2>
+
+        <p id="finalResultText"></p>
+
+        <div id="resultDetails" class="result-card"></div>
+
+        <div class="section-title">所有受測者完成紀錄</div>
+
+        <div id="resultsRecords" class="record-list"></div>
+
+        <div class="difficulty-group">
+            <button class="btn blue" onclick="exportCSV()">匯出 CSV</button>
+            <button class="btn easy" onclick="retryGame()">再測驗一次</button>
+            <button class="btn gray" onclick="resetToStart()">返回首頁</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+let score=0,timer=30,isPlaying=false;
+
+let timerInterval=null;
+let spawnInterval=null;
+let countdownInterval=null;
+
+let currentDifficulty="medium";
+let selectedDifficulty="medium";
+let playerName="";
+
+let questionRecords=[];
+let activeItems=new Map();
+let itemCounter=0;
+let allRecords=[];
+
+try{
+    allRecords=JSON.parse(
+        localStorage.getItem("christmasTrainingSessions_v1")||"[]"
+    );
+    if(!Array.isArray(allRecords))allRecords=[];
+}catch(e){
+    allRecords=[];
+}
+
+const scoreEl=document.getElementById("score");
+const timerEl=document.getElementById("timer");
+const canvas=document.getElementById("canvas");
+
+const startScreen=document.getElementById("startScreen");
+const gameOverScreen=document.getElementById("gameOverScreen");
+const countdownEl=document.getElementById("countdown");
+
+const finalResultText=document.getElementById("finalResultText");
+const resultDetails=document.getElementById("resultDetails");
+
+const levelNames={
+    easy:"初階",
+    medium:"中階",
+    hard:"高階"
+};
+
+const levelSettings={
+    easy:{
+        spawnRate:1200,
+        lifetime:2200,
+        bombChance:.15,
+        bombPenalty:1
+    },
+    medium:{
+        spawnRate:1000,
+        lifetime:1800,
+        bombChance:.25,
+        bombPenalty:2
+    },
+    hard:{
+        spawnRate:800,
+        lifetime:1500,
+        bombChance:.32,
+        bombPenalty:3
+    }
+};
+
+function createSnowflakes(){
+    for(let i=0;i<24;i++){
+        const snow=document.createElement("div");
+
+        snow.className="snowflake";
+        snow.textContent=Math.random()>.5?"❄":"✦";
+        snow.style.left=Math.random()*100+"%";
+        snow.style.fontSize=(12+Math.random()*18)+"px";
+        snow.style.animationDuration=(5+Math.random()*8)+"s";
+        snow.style.animationDelay=(-Math.random()*10)+"s";
+
+        canvas.appendChild(snow);
+    }
+}
+
+function saveRecords(){
+    try{
+        localStorage.setItem(
+            "christmasTrainingSessions_v1",
+            JSON.stringify(allRecords)
+        );
+    }catch(error){
+        alert("紀錄儲存失敗，請確認瀏覽器允許網站使用儲存空間。");
+        console.error(error);
+    }
+
+    renderHomeRecords();
+}
+
+function renderHomeRecords(){
+
+    const records=[...allRecords].reverse();
+
+    const containers=[
+        document.getElementById("homeRecords"),
+        document.getElementById("resultsRecords")
+    ].filter(Boolean);
+
+    containers.forEach(box=>{
+
+        if(!records.length){
+            box.innerHTML=
+                '<div class="records-empty">尚無測驗紀錄</div>';
+            return;
+        }
+
+        const table=document.createElement("table");
+        table.className="records-table";
+
+        table.innerHTML=`
+            <thead>
+                <tr>
+                    <th>受測者</th>
+                    <th>關卡</th>
+                    <th>完成時間</th>
+                    <th>命中數</th>
+                    <th>正確率</th>
+                    <th>平均反應時間</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+
+        const tbody=table.querySelector("tbody");
+
+        records.forEach(record=>{
+
+            const tr=document.createElement("tr");
+
+            const date=record.date
+                ?new Date(record.date).toLocaleString("zh-TW")
+                :"—";
+
+            [
+                record.name||"—",
+                levelNames[record.difficulty]||record.difficulty||"—",
+                date,
+                String(record.hitStars??0)+" / "+String(record.totalStars??0),
+                String(record.accuracy??0)+"%",
+                String(record.average??0)+" ms"
+            ].forEach(value=>{
+
+                const td=document.createElement("td");
+                td.textContent=value;
+                tr.appendChild(td);
+
+            });
+
+            tbody.appendChild(tr);
+
+        });
+
+        box.replaceChildren(table);
+
+    });
+
+}
+
+function selectDifficulty(difficulty){
+
+    selectedDifficulty=difficulty;
+
+    document.querySelectorAll(
+        "#difficultyGroup [data-level]"
+    ).forEach(button=>{
+
+        button.classList.toggle(
+            "selected-level",
+            button.dataset.level===difficulty
+        );
+
+    });
+
+}
+
+function startGame(difficulty=selectedDifficulty){
+
+    selectedDifficulty=difficulty;
+
+    playerName=document.getElementById("nameInput").value.trim();
+
+    if(!playerName){
+        alert("請先輸入受測者姓名或暱稱！");
+        document.getElementById("nameInput").focus();
+        return;
+    }
+
+    currentDifficulty=difficulty;
+
+    score=0;
+    timer=30;
+    questionRecords=[];
+    itemCounter=0;
+
+    scoreEl.textContent=score;
+    timerEl.textContent=timer;
+
+    document.getElementById("playerName").textContent=playerName;
+    document.getElementById("levelText").textContent=levelNames[difficulty];
+
+    startScreen.classList.add("hidden");
+    gameOverScreen.classList.add("hidden");
+
+    clearAllTimers();
+    removeAllItems();
+
+    isPlaying=false;
+
+    runCountdown();
+}
+
+function runCountdown(){
+
+    let count=3;
+
+    countdownEl.classList.remove("hidden");
+    countdownEl.textContent=count;
+
+    countdownInterval=setInterval(()=>{
+
+        count--;
+
+        if(count>0){
+            countdownEl.textContent=count;
+        }
+        else if(count===0){
+            countdownEl.textContent="開始！";
+        }
+        else{
+
+            clearInterval(countdownInterval);
+            countdownInterval=null;
+
+            countdownEl.classList.add("hidden");
+
+            beginActualGame();
+
+        }
+
+    },1000);
+
+}
+
+function beginActualGame(){
+
+    isPlaying=true;
+
+    const setting=levelSettings[currentDifficulty];
+
+    timerInterval=setInterval(()=>{
+
+        timer--;
+        timerEl.textContent=timer;
+
+        if(timer<=0)endGame();
+
+    },1000);
+
+    spawnItem();
+
+    spawnInterval=setInterval(
+        spawnItem,
+        setting.spawnRate
+    );
+
+}
+
+function spawnItem(){
+
+    if(!isPlaying)return;
+
+    const setting=levelSettings[currentDifficulty];
+
+    const isBomb=Math.random()<setting.bombChance;
+
+    const item=document.createElement("div");
+    const id=++itemCounter;
+
+    item.className=`item ${isBomb?"bomb":"star"}`;
+    item.textContent=isBomb?"💣":"⭐";
+
+    /* 配合縮小後的目標尺寸 */
+    const itemSize=70;
+
+    const maxX=Math.max(10,canvas.clientWidth-itemSize-10);
+    const maxY=Math.max(10,canvas.clientHeight-itemSize-95);
+
+    const x=10+Math.random()*Math.max(0,maxX-10);
+    const y=10+Math.random()*Math.max(0,maxY-10);
+
+    item.style.left=x+"px";
+    item.style.top=y+"px";
+
+    const appearedAt=performance.now();
+
+    activeItems.set(id,{
+        element:item,
+        isBomb,
+        appearedAt,
+        clicked:false,
+        timeout:null
+    });
+
+    item.addEventListener("pointerdown",event=>{
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if(!isPlaying)return;
+
+        const data=activeItems.get(id);
+
+        if(!data||data.clicked)return;
+
+        data.clicked=true;
+
+        const reactionTime=Math.round(
+            performance.now()-data.appearedAt
+        );
+
+        const points=isBomb
+            ?-setting.bombPenalty
+            :1;
+
+        score=Math.max(0,score+points);
+        scoreEl.textContent=score;
+
+        questionRecords.push({
+
+            number:id,
+            type:isBomb?"炸彈":"星星",
+            result:isBomb?"點擊炸彈":"點擊星星",
+            reactionTime,
+            points
+
+        });
+
+        item.style.transform="scale(0.5)";
+        item.style.opacity="0";
+
+        setTimeout(()=>removeItem(id),100);
+
+    });
+
+    canvas.appendChild(item);
+
+    const timeout=setTimeout(()=>{
+
+        const data=activeItems.get(id);
+
+        if(data&&!data.clicked){
+
+            questionRecords.push({
+
+                number:id,
+                type:isBomb?"炸彈":"星星",
+                result:"未點擊／逾時",
+                reactionTime:null,
+                points:0
+
+            });
+
+            removeItem(id);
+
+        }
+
+    },setting.lifetime);
+
+    activeItems.get(id).timeout=timeout;
+
+}
+
+function removeItem(id){
+
+    const data=activeItems.get(id);
+
+    if(!data)return;
+
+    clearTimeout(data.timeout);
+
+    if(data.element.parentElement){
+        data.element.remove();
+    }
+
+    activeItems.delete(id);
+
+}
+
+function removeAllItems(){
+
+    activeItems.forEach(data=>{
+
+        clearTimeout(data.timeout);
+        data.element.remove();
+
+    });
+
+    activeItems.clear();
+
+    canvas.querySelectorAll(".item").forEach(el=>el.remove());
+
+}
+
+function clearAllTimers(){
+
+    if(timerInterval)clearInterval(timerInterval);
+    if(spawnInterval)clearInterval(spawnInterval);
+    if(countdownInterval)clearInterval(countdownInterval);
+
+    timerInterval=null;
+    spawnInterval=null;
+    countdownInterval=null;
+
+}
+
+function endGame(){
+
+    if(!isPlaying)return;
+
+    isPlaying=false;
+
+    clearAllTimers();
+
+    activeItems.forEach((data,id)=>{
+
+        if(!data.clicked){
+
+            questionRecords.push({
+
+                number:id,
+                type:data.isBomb?"炸彈":"星星",
+                result:"時間結束未點擊",
+                reactionTime:null,
+                points:0
+
+            });
+
+        }
+
+    });
+
+    removeAllItems();
+
+    questionRecords.sort((a,b)=>a.number-b.number);
+
+    const clickedRecords=questionRecords.filter(
+        r=>r.reactionTime!==null
+    );
+
+    const starRecords=questionRecords.filter(
+        r=>r.type==="星星"
+    );
+
+    const hitStars=questionRecords.filter(
+        r=>r.result==="點擊星星"
+    ).length;
+
+    const hitBombs=questionRecords.filter(
+        r=>r.result==="點擊炸彈"
+    ).length;
+
+    const missedTargets=questionRecords.filter(
+        r=>r.reactionTime===null
+    ).length;
+
+    const average=clickedRecords.length
+        ?Math.round(
+            clickedRecords.reduce(
+                (sum,r)=>sum+r.reactionTime,0
+            )/clickedRecords.length
+        )
+        :0;
+
+    const fastest=clickedRecords.length
+        ?Math.min(...clickedRecords.map(r=>r.reactionTime))
+        :0;
+
+    const slowest=clickedRecords.length
+        ?Math.max(...clickedRecords.map(r=>r.reactionTime))
+        :0;
+
+    const accuracy=starRecords.length
+        ?Math.round(hitStars/starRecords.length*100)
+        :0;
+
+    const result={
+
+        name:playerName,
+        difficulty:currentDifficulty,
+        score,
+
+        totalTargets:questionRecords.length,
+        totalStars:starRecords.length,
+
+        hitStars,
+        hitBombs,
+        missedTargets,
+
+        average,
+        fastest,
+        slowest,
+        accuracy,
+
+        records:[...questionRecords],
+        date:new Date().toISOString()
+
+    };
+
+    allRecords.push(result);
+
+    saveRecords();
+
+    showResults(result);
+
+}
+
+function showResults(result){
+
+    finalResultText.innerHTML=
+        `受測者：<b>${escapeHTML(result.name)}</b><br>【${levelNames[result.difficulty]}模式】`;
+
+    let html=`
+
+        <div class="result-row">
+            <span>最終分數</span>
+            <strong>${result.score} 分</strong>
+        </div>
+
+        <div class="result-row">
+            <span>總出現目標數</span>
+            <strong>${result.totalTargets} 個</strong>
+        </div>
+
+        <div class="result-row">
+            <span>星星成功點擊</span>
+            <strong>${result.hitStars} 次</strong>
+        </div>
+
+        <div class="result-row">
+            <span>炸彈誤觸</span>
+            <strong>${result.hitBombs} 次</strong>
+        </div>
+
+        <div class="result-row">
+            <span>星星命中率</span>
+            <strong>${result.accuracy}%</strong>
+        </div>
+
+        <div class="result-row">
+            <span>未點擊目標</span>
+            <strong>${result.missedTargets} 個</strong>
+        </div>
+
+        <div class="result-row">
+            <span>平均反應時間</span>
+            <strong>${result.average} ms</strong>
+        </div>
+
+        <div class="result-row">
+            <span>最快反應時間</span>
+            <strong>${result.fastest} ms</strong>
+        </div>
+
+        <div class="result-row">
+            <span>最慢反應時間</span>
+            <strong>${result.slowest} ms</strong>
+        </div>
+
+        <div class="section-title">
+            每次目標出現的詳細紀錄
+        </div>
+
+        <table class="result-table">
+
+            <thead>
+                <tr>
+                    <th>序號</th>
+                    <th>目標</th>
+                    <th>結果</th>
+                    <th>反應時間</th>
+                    <th>得分</th>
+                </tr>
+            </thead>
+
+            <tbody>
+    `;
+
+    result.records.forEach(r=>{
+
+        html+=`
+
+            <tr>
+                <td>${r.number}</td>
+                <td>${r.type}</td>
+                <td>${r.result}</td>
+                <td>${r.reactionTime===null?"—":r.reactionTime+" ms"}</td>
+                <td>${r.points>0?"+":""}${r.points}</td>
+            </tr>
+
+        `;
+
+    });
+
+    html+=`
+
+            </tbody>
+        </table>
+
+        <p class="small-note">
+            反應時間從目標出現到受測者點擊的時間計算。
+            未點擊目標不納入平均反應時間。
+        </p>
+
+    `;
+
+    resultDetails.innerHTML=html;
+
+    renderHomeRecords();
+
+    gameOverScreen.classList.remove("hidden");
+
+}
+
+function escapeHTML(value){
+
+    return String(value).replace(/[&<>"']/g,char=>({
+
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+
+    })[char]);
+
+}
+
+function retryGame(){
+
+    gameOverScreen.classList.add("hidden");
+
+    startGame(currentDifficulty);
+
+}
+
+function resetToStart(){
+
+    clearAllTimers();
+
+    isPlaying=false;
+
+    removeAllItems();
+
+    gameOverScreen.classList.add("hidden");
+
+    startScreen.classList.remove("hidden");
+
+    selectDifficulty(currentDifficulty);
+
+    document.getElementById("playerName").textContent="尚未輸入";
+
+    document.getElementById("levelText").textContent="尚未開始";
+
+    scoreEl.textContent="0";
+
+    timerEl.textContent="30";
+
+    renderHomeRecords();
+
+}
+
+function exportCSV(){
+
+    if(allRecords.length===0){
+
+        alert("目前沒有測驗紀錄可以匯出！");
+        return;
+
+    }
+
+    const rows=[[
+
+        "受測者暱稱",
+        "測驗日期",
+        "模式",
+        "總分",
+        "總目標數",
+        "星星數",
+        "星星成功點擊",
+        "炸彈誤觸",
+        "星星命中率",
+        "平均反應時間(ms)",
+        "最快反應時間(ms)",
+        "最慢反應時間(ms)",
+        "題號",
+        "目標",
+        "作答結果",
+        "反應時間(ms)",
+        "得分"
+
+    ]];
+
+    allRecords.forEach(session=>{
+
+        session.records.forEach(r=>{
+
+            rows.push([
+
+                session.name,
+                new Date(session.date).toLocaleString("zh-TW"),
+                levelNames[session.difficulty],
+                session.score,
+                session.totalTargets,
+                session.totalStars,
+                session.hitStars,
+                session.hitBombs,
+                session.accuracy+"%",
+                session.average,
+                session.fastest,
+                session.slowest,
+                r.number,
+                r.type,
+                r.result,
+                r.reactionTime===null?"":r.reactionTime,
+                r.points
+
+            ]);
+
+        });
+
+    });
+
+    const csv="\uFEFF"+rows.map(row=>
+        row.map(value=>
+            `"${String(value).replace(/"/g,'""')}"`
+        ).join(",")
+    ).join("\r\n");
+
+    const blob=new Blob(
+        [csv],
+        {type:"text/csv;charset=utf-8;"}
+    );
+
+    const url=URL.createObjectURL(blob);
+
+    const link=document.createElement("a");
+
+    link.href=url;
+    link.download="聖誕星星測驗紀錄.csv";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+function clearRecords(){
+
+    if(!confirm("確定要刪除所有測驗紀錄嗎？此操作無法復原。")){
+        return;
+    }
+
+    allRecords=[];
+
+    saveRecords();
+
+}
+
+createSnowflakes();
+renderHomeRecords();
+
+</script>
+</body>
+</html>
